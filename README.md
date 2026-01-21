@@ -11,8 +11,7 @@
 > 🚧 **Note:** This project is currently in the **initial development phase**. The architecture design and base structure are being established.
 > (현재 프로젝트 초기 구조 설계 및 보일러플레이트 작성 단계입니다.)
 
-> **Project Goal:** 실시간 이동 동기화(Movement Sync) 및 대규모 트래픽 처리를 위한 확장 가능한 게임 서버 아키텍처 구현.  
-> **Target:** 단일 인스턴스 기준 **CCU 1,000명**의 이동 동기화 및 DB 트랜잭션 처리 안정성 검증.
+> **Project Goal:** 실시간 이동 동기화(Movement Sync) 및 대규모 트래픽 처리를 위한 확장 가능한 게임 서버 아키텍처 구현.
 
 ---
 
@@ -36,11 +35,12 @@
 - [ ] **Packet Serialization:** 리플렉션을 사용하지 않는 고성능 패킷 직렬화/역직렬화 버퍼 처리.
 - [ ] **NATS Integration:** `Request-Reply` 패턴을 통한 DB 비동기 처리 연동.
 
-### 2. Hot/Cold Data Separation Strategy
-데이터베이스의 Lock 경합을 최소화하기 위해 데이터의 성격에 따라 테이블을 분리 설계했습니다.
+### 2. Database Schema & Design Strategy
 
-<img src="./docs/ERD_Account.png" width="900" height="auto" alt="Account ERD">
-<img src="./docs/ERD_Item.png" width="500" height="auto" alt="Item ERD">
+<div align="center">
+  <img src="./docs/ERD_Account.png" width="800" height="auto" alt="Account Strategy">
+  <br><br> <img src="./docs/ERD_Item.png" width="500" height="auto" alt="Item Schema">
+</div>
 
 ### 3. Development Environment
 - [x] **Project Structure:** 솔루션 및 프로젝트 분리 (`GameServer`, `DBServer`, `TestRunner`).
@@ -83,3 +83,9 @@
 **Kang Ik-jun** (Server Programmer)
 * Experience with C++ & C# Game Server Development.
 * Interested in High-Performance Network Architecture & Cloud Native Gaming.
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License

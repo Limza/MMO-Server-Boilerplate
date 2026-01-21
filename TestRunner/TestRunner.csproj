@@ -7,4 +7,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DbWorker\DbWorker.csproj" />
+      <ProjectReference Include="..\Server\Server.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Testcontainers.Nats" Version="4.10.0" />
+    </ItemGroup>
+
 </Project>
