@@ -1,0 +1,67 @@
+@startuml
+
+hide circle
+skinparam nodesep 50  
+skinparam ranksep 50
+skinparam noteBackgroundColor #FEFECE
+skinparam noteBorderColor #D4D433
+
+' ---------------------------------------------------------
+' 1. ACCOUNT (부모)
+' ---------------------------------------------------------
+entity "ACCOUNT" as account {
+    *account_id : BIGINT <<PK>>
+    --
+    nickname : VARCHAR(32)
+}
+
+' ---------------------------------------------------------
+' 2. ITEM_EQUIPMENT (장비 - Unique)
+' 세상에 단 하나뿐인 아이템 (고유 ID 필수)
+' ---------------------------------------------------------
+entity "ITEM_EQUIPMENT" as equip {
+    *account_id : BIGINT <<FK, PK>>
+    *item_uid : BIGINT <<PK>>
+    --
+    *data_id : INT
+    *slot_index : INT
+    enchant_level : TINYINT
+    options_json : JSON
+    is_locked : TINYINT
+    created_at : DATETIME
+}
+
+note bottom of equip
+  <b>[장비 아이템]</b>
+  * <b>PK: (account_id, item_uid)</b>
+    -> 유저별로 모아서 저장 (로딩 속도 최적화)
+  * <b>item_uid</b>: Snowflake 사용 (전역 고유)
+  * <b>data_id</b>: 기획 데이터 ID (예: 1001=롱소드)
+  * <b>options_json</b>: 옵션이 복잡하면 JSON으로 저장
+end note
+
+' ---------------------------------------------------------
+' 3. ITEM_STORAGE (소모품 - Stackable)
+' 개수가 중요한 아이템 (고유 ID 불필요)
+' ---------------------------------------------------------
+entity "ITEM_STORAGE" as storage {
+    *account_id : BIGINT <<FK, PK>>
+    *data_id : INT <<PK>>
+    --
+    *count : BIGINT
+    *slot_index : INT
+    last_updated_at : DATETIME
+}
+
+note bottom of storage
+  <b>[소모품/재료]</b>
+  * <b>PK: (account_id, data_id)</b>
+    -> 고유키(UID) 없이, 유저+물품ID로 식별
+  * <b>count</b>: 수량 (겹쳐지므로 이것만 Update)
+end note
+
+' 관계 정의
+account ||..|{ equip : "1:N (장비)"
+account ||..|{ storage : "1:N (소모품)"
+
+@enduml

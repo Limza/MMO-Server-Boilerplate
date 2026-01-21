@@ -25,7 +25,7 @@
 * **DB Worker:** NATS 큐를 구독하며 실제 데이터 처리. 부하 발생 시 독립적인 스케일 아웃 가능.
 * **Infrastructure (Testcontainers):** 개발 및 테스트 환경에서 Docker를 통해 NATS와 MySQL을 동적으로 프로비저닝.
 
-![Architecture Diagram](./README_Architecture.png)
+![Architecture Diagram](./docs/Architecture.png)
 
 ---
 
@@ -39,9 +39,8 @@
 ### 2. Hot/Cold Data Separation Strategy
 데이터베이스의 Lock 경합을 최소화하기 위해 데이터의 성격에 따라 테이블을 분리 설계했습니다.
 
-![Database ERD](./README_ERD_Account.png)
-
-- [x] **ERD Design:** Hot/Cold 데이터 분리 및 스키마 설계 완료.
+<img src="./docs/ERD_Account.png" width="900" height="auto" alt="Account ERD">
+<img src="./docs/ERD_Item.png" width="500" height="auto" alt="Item ERD">
 
 ### 3. Development Environment
 - [x] **Project Structure:** 솔루션 및 프로젝트 분리 (`GameServer`, `DBServer`, `TestRunner`).

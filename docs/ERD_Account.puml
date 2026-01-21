@@ -1,0 +1,112 @@
+@startuml
+
+' 디자인 설정
+hide circle
+skinparam noteBackgroundColor #FEFECE
+skinparam noteBorderColor #D4D433
+
+skinparam nodesep 50  
+skinparam ranksep 50
+
+' ---------------------------------------------------------
+' 1. ACCOUNT (유저 본체 - Cold Data)
+' ---------------------------------------------------------
+entity "ACCOUNT" as account {
+    *account_id : BIGINT <<PK>>
+    *nickname : VARCHAR(32)
+    *status : TINYINT
+    *created_at : DATETIME
+}
+
+note left of account
+  <b>[기본 정보]</b>
+  * 변동이 적은 정적 데이터
+  * <b>status</b>: 0(정상), 1(정지) 등
+end note
+
+' ---------------------------------------------------------
+' 2. ACCOUNT_STAT (통계/누적 - Hot Data)
+' ---------------------------------------------------------
+entity "ACCOUNT_STAT" as stat {
+    *account_id : BIGINT <<FK, PK>>
+    --
+    *total_play_time_sec : BIGINT
+    *last_login_at : DATETIME
+    *last_logout_at : DATETIME
+}
+
+note top of stat
+  <b>[누적 통계 (Hot)]</b>
+  * <b>account_id</b>: ACCOUNT와 1:1 관계
+  * <b>total_play_time_sec</b>: 총 플레이 시간 (초)
+  * 자주 Update 되므로 본체에서 분리하여
+    ACCOUNT 테이블의 Lock 경합을 방지함
+end note
+
+' ---------------------------------------------------------
+' 3. LOGIN_LOG (접속 이력 - History)
+' ---------------------------------------------------------
+entity "LOGIN_LOG" as log {
+    *log_id : BIGINT <<PK>>
+    *account_id : BIGINT <<FK>>
+    --
+    *device_id : VARCHAR(128)
+    *login_at : DATETIME
+    *logout_at : DATETIME
+    *play_time_sec : INT
+    *ip_address : VARCHAR(45)
+}
+
+note bottom of log
+  <b>[접속 로그]</b>
+  * 로그아웃 시점에 PlayTime 계산하여 기록
+  * <b>device_id</b>: 어떤 기기로 접속했는지 기록
+  * 데이터량이 가장 많으므로 <b>일정이상 쌓이면 S3로 이동</b>
+end note
+
+' ---------------------------------------------------------
+' 4. ACCOUNT_AUTH (인증 수단)
+' ---------------------------------------------------------
+entity "ACCOUNT_AUTH" as auth {
+    *account_id : BIGINT <<FK, PK>>
+    *platform_type : TINYINT <<PK>>
+    *platform_user_id : VARCHAR(128) <<PK>>
+    *linked_at : DATETIME
+}
+
+note bottom of auth
+  <b>[인증 정보]</b>
+  * Google, Apple, Guest 등
+  * (type + user_id) Unique Index 필수
+end note
+
+' ---------------------------------------------------------
+' 5. ACCOUNT_DEVICE (기기 및 푸시)
+' ---------------------------------------------------------
+entity "ACCOUNT_DEVICE" as device {
+    *account_id : BIGINT <<FK, PK>>
+    *device_id : VARCHAR(128) <<PK>>
+    --
+    *push_token : VARCHAR(256)
+    *os_type : TINYINT
+    *is_allowed : TINYINT
+    *registered_at : DATETIME
+    *last_used_at : DATETIME
+}
+
+note bottom of device
+  <b>[기기 정보]</b>
+  * 1명의 유저가 폰, 패드 등 여러 기기 사용 가능
+  * 중복 로그인 체크 및 푸시 발송용
+end note
+
+' ---------------------------------------------------------
+' 관계 정의
+' ---------------------------------------------------------
+account ||----right----|| stat : "1:1 (Hot/Cold 분리)"
+
+account ||..|{ auth : "1:N (로그인 수단)"
+account ||..|{ device : "1:N (등록 기기)"
+account ||..|{ log : "1:N (접속 기록)"
+
+@enduml
